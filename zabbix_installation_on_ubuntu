@@ -1,0 +1,69 @@
+Step 1 – Install Apache, MySQL and PHP
+You must have a LAMP environment on your server to use Zabbix. If you already have LAMP configured, just skip this step, else install Apache, MySQL, and PHP using the following commands.
+sudo apt-get update
+sudo apt-get install apache2 libapache2-mod-php
+sudo apt-get install mysql-server
+sudo apt-get install php php-mbstring php-gd php-xml php-bcmath php-ldap php-mysql
+Update timezone in php configuration file /etc/php/PHP_VERSION/apache2/php.ini. Like below:
+[Date]
+; http://php.net/date.timezone
+date.timezone = 'Asia/Kolkata'
+Step 2 – Enable Required Apt Repository
+Before installing Zabbix first configure Zabbix package repository in your system using following commands. Use commands as per your operating system.
+## Ubuntu 18.04 LTS (Bionic):
+
+wget https://repo.zabbix.com/zabbix/4.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_4.0-3+bionic_all.deb
+sudo dpkg -i zabbix-release_4.0-3+bionic_all.deb
+
+
+## Ubuntu 16.04 LTS (Xenial):
+
+wget https://repo.zabbix.com/zabbix/4.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_4.0-3+xenial_all.deb
+sudo dpkg -i zabbix-release_4.0-3+xenial_all.deb
+
+Step 3 – Install Zabbix Server
+After adding Zabbix apt repository in your system use following command to install Zabbix server. Here zabbix-server-mysql package includes Zabbix server with MySQL support. The zabbix-frontend-php package provides and web interface is written in PHP for the Zabbix server management
+sudo apt-get update
+sudo apt-get install zabbix-server-mysql zabbix-frontend-php zabbix-agent
+
+Step 4 – Create Database Schema
+Now create a database schema for your Zabbix server. Login to your MySQL server using administrative privileges and use the following queries to create MySQL database and user for the Zabbix server.
+mysql -u root -p
+
+mysql> CREATE DATABASE zabbixdb character set utf8 collate utf8_bin;
+mysql> CREATE USER 'zabbix'@'localhost' IDENTIFIED BY 'password';
+mysql> GRANT ALL PRIVILEGES ON zabbixdb.* TO 'zabbix'@'localhost' WITH GRANT OPTION;
+mysql> FLUSH PRIVILEGES;
+
+Also, load the Zabbix database schema to the database created above.
+cd /usr/share/doc/zabbix-server-mysql
+zcat create.sql.gz | mysql -u zabbix -p zabbixdb
+Step 5 – Edit Zabbix Configuration File
+Edit Zabbix server configuration file /etc/zabbix/zabbix_server.conf in your favorite text editor and update the following database configurations. This will be used by Zabbix server to connect to the database.
+  DBHost=localhost
+  DBName=zabbixdb
+  DBUser=zabbix
+  DBPassword=password
+Step 6 – Restart Apache and Zabbix
+Zabbix creates its own apache configuration file /etc/zabbix/apache.conf and make a link to Apache configuration directory. Let’s use the following command to restart Apache service.
+sudo service apache2 restart
+Zabbix server configuration file are located at /etc/zabbix/zabbix_server.conf. Restart Zabbix server.
+sudo service zabbix-server restart
+After starting the Zabbix service, let’s go to Zabbix web installer and finish the installation.
+Step 7 – Complete Zabbix Web Installer Wizzard
+Zabbix web installer can be accessed on /zabbix subdirectory URL on your servers IP or domain. For example, host.tecadmin.net is pointed to my Zabbix server. Now access the Zabbix using the following URL. You must change FQDN as per your setup.
+
+Step 8 - start the agent
+sudo systemctl start zabbix-agent
+
+
+
+Zabbix Login Screen
+Login to Zabbix using default credentials.
+ Username:  Admin
+ Password:  zabbix
+ 
+ source : 
+ https://tecadmin.net/install-zabbix-on-ubuntu/
+ 
+ 
